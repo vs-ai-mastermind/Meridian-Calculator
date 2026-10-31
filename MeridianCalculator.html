@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Optical meridian anisometropia</title>
+  <style>
+    :root {
+      --paper: #e6e0d4;
+      --sheet: #f6f3ec;
+      --ink: #1c1814;
+      --muted: #5f574c;
+      --line: #d3cbbd;
+      --od: #1d4e89;
+      --os: #8c3a2f;
+      --trace: #1e4d45;
+      --peak: #a33b24;
+      --zero: #8a8174;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 180px),
+        var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(880px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 64px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 2.15rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      max-width: 40rem;
+      color: var(--muted);
+    }
+
+    .rule {
+      margin: 22px 0 28px;
+      border: 0;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      height: 4px;
+    }
+
+    .eyes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .eye {
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      border-left-width: 4px;
+      padding: 16px 18px 18px;
+    }
+
+    .eye.od { border-left-color: var(--od); }
+    .eye.os { border-left-color: var(--os); }
+
+    .eye h2 {
+      margin: 0 0 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eye.od h2 { color: var(--od); }
+    .eye.os h2 { color: var(--os); }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 4px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid #c9c0b2;
+      padding: 0 10px;
+    }
+
+    .control:focus-within {
+      border-color: var(--ink);
+      outline: 2px solid transparent;
+      box-shadow: 0 0 0 1px var(--ink);
+    }
+
+    input {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: 600 1.15rem/1.2 "Segoe UI", sans-serif;
+      font-variant-numeric: tabular-nums;
+      padding: 10px 0;
+    }
+
+    input:focus { outline: none; }
+
+    .unit {
+      color: var(--muted);
+      font-size: 0.85rem;
+      flex: none;
+    }
+
+    .note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .result {
+      margin-top: 18px;
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      padding: 20px 22px 18px;
+      min-height: 9rem;
+    }
+
+    .result h2 {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .magnitude {
+      margin: 6px 0 0;
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 3.25rem;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .where {
+      margin: 8px 0 0;
+      font-size: 1.15rem;
+    }
+
+    .detail {
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail li {
+      margin: 0;
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .detail .powers {
+      color: var(--ink);
+    }
+
+    .detail .powers span + span::before {
+      content: "·";
+      margin: 0 0.55rem;
+      color: var(--muted);
+    }
+
+    .relation,
+    .se,
+    .steady {
+      color: var(--muted);
+    }
+
+    .detail strong {
+      display: block;
+      font-weight: 600;
+    }
+
+    .empty {
+      margin: 18px 0 0;
+      color: var(--muted);
+    }
+
+    .chart-wrap {
+      margin-top: 18px;
+      background: var(--sheet);
+      border: 1px solid var(--line);
+      padding: 16px 16px 10px;
+    }
+
+    .chart-wrap h2 {
+      margin: 0 0 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .chart-wrap p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    @media (max-width: 680px) {
+      main { padding-top: 24px; }
+      header h1 { font-size: 1.7rem; }
+      .eyes { grid-template-columns: 1fr; }
+      .magnitude { font-size: 2.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Optical meridian anisometropia</h1>
+      <p>Finds the meridian where the two eyes differ most in power, and the anisometropia there in diopters.</p>
+      <hr class="rule">
+    </header>
+
+    <div class="eyes">
+      <section class="eye od" aria-labelledby="od-heading">
+        <h2 id="od-heading">OD · Right eye</h2>
+        <div class="fields">
+          <label>Sphere
+            <span class="control"><input id="od-s" type="number" step="0.25" inputmode="decimal" autocomplete="off"><span class="unit">D</span></span>
+          </label>
+          <label>Cylinder
+            <span class="control"><input id="od-c" type="number" step="0.25" inputmode="decimal" autocomplete="off"><span class="unit">D</span></span>
+          </label>
+          <label>Axis
+            <span class="control"><input id="od-a" type="number" step="1" min="0" max="180" inputmode="numeric" autocomplete="off"><span class="unit">°</span></span>
+          </label>
+        </div>
+      </section>
+      <section class="eye os" aria-labelledby="os-heading">
+        <h2 id="os-heading">OS · Left eye</h2>
+        <div class="fields">
+          <label>Sphere
+            <span class="control"><input id="os-s" type="number" step="0.25" inputmode="decimal" autocomplete="off"><span class="unit">D</span></span>
+          </label>
+          <label>Cylinder
+            <span class="control"><input id="os-c" type="number" step="0.25" inputmode="decimal" autocomplete="off"><span class="unit">D</span></span>
+          </label>
+          <label>Axis
+            <span class="control"><input id="os-a" type="number" step="1" min="0" max="180" inputmode="numeric" autocomplete="off"><span class="unit">°</span></span>
+          </label>
+        </div>
+      </section>
+    </div>
+    <p class="note">Enter cylinder and axis in the same form, plus or minus cylinder. Power in meridian m is Ds + Dc sin²(m − axis).</p>
+
+    <section class="result" aria-live="polite">
+      <h2>Greatest anisometropia</h2>
+      <div id="result"></div>
+    </section>
+
+    <section class="chart-wrap">
+      <h2>Power difference by meridian</h2>
+      <p id="chart-note">Signed difference, OD minus OS, from 0° to 180°.</p>
+      <svg id="chart" viewBox="0 0 640 280" role="img" aria-labelledby="chart-title">
+        <title id="chart-title">Power difference by meridian</title>
+      </svg>
+    </section>
+  </main>
+
+  <script>
+    const fields = {
+      od: { s: document.getElementById("od-s"), c: document.getElementById("od-c"), a: document.getElementById("od-a") },
+      os: { s: document.getElementById("os-s"), c: document.getElementById("os-c"), a: document.getElementById("os-a") }
+    };
+    const resultEl = document.getElementById("result");
+    const chart = document.getElementById("chart");
+    const chartNote = document.getElementById("chart-note");
+
+    function parseEye(eye) {
+      const sphere = readNumber(eye.s);
+      const cylinder = readNumber(eye.c);
+      const axis = readNumber(eye.a);
+      if (sphere === null || cylinder === null || axis === null) return { missing: true };
+      if (axis < 0 || axis > 180) return { invalidAxis: true };
+      return { s: sphere, c: cylinder, a: axis };
+    }
+
+    function readNumber(input) {
+      if (input.value.trim() === "") return null;
+      const value = Number(input.value);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function roundD(value) {
+      return Math.round(value * 100) / 100;
+    }
+
+    function formatPower(value) {
+      const rounded = roundD(value);
+      if (rounded === 0) return "0.00 D";
+      const sign = rounded > 0 ? "+" : "−";
+      return sign + Math.abs(rounded).toFixed(2) + " D";
+    }
+
+    function formatDiopters(value) {
+      return Math.abs(roundD(value)).toFixed(2) + " D";
+    }
+
+    function formatSigned(value) {
+      const rounded = roundD(value);
+      if (rounded === 0) return "0.00 D";
+      const sign = rounded > 0 ? "+" : "−";
+      return sign + Math.abs(rounded).toFixed(2) + " D";
+    }
+
+    /** Meridian in ophthalmic notation: 0° is reported as 180°. */
+    function canonicalMeridian(deg) {
+      const turns = ((deg % 180) + 180) % 180;
+      let rounded = Math.round(turns);
+      if (rounded >= 180) rounded -= 180;
+      if (rounded === 0) return 180;
+      return rounded;
+    }
+
+    function power(sphere, cylinder, axis, meridian) {
+      const theta = (meridian - axis) * Math.PI / 180;
+      return sphere + cylinder * Math.sin(theta) ** 2;
+    }
+
+    /**
+     * OD − OS = K + P cos(2m) + Q sin(2m), from sin²β = (1 − cos 2β) / 2.
+     * The extreme meridians are 90° apart.
+     */
+    function extremes(od, os) {
+      const toRad = Math.PI / 180;
+      const K = (od.s + od.c / 2) - (os.s + os.c / 2);
+      const P = -(od.c / 2) * Math.cos(2 * od.a * toRad) + (os.c / 2) * Math.cos(2 * os.a * toRad);
+      const Q = -(od.c / 2) * Math.sin(2 * od.a * toRad) + (os.c / 2) * Math.sin(2 * os.a * toRad);
+      const R = Math.hypot(P, Q);
+      const phi = Math.atan2(Q, P);
+      const exactMax = (phi / toRad) / 2;
+      return {
+        K,
+        R,
+        maxSignedMeridian: canonicalMeridian(exactMax),
+        minSignedMeridian: canonicalMeridian(exactMax + 90)
+      };
+    }
+
+    function meridianSample(od, os, meridian) {
+      const odPower = roundD(power(od.s, od.c, od.a, meridian));
+      const osPower = roundD(power(os.s, os.c, os.a, meridian));
+      const signed = roundD(odPower - osPower);
+      return {
+        meridian,
+        odPower,
+        osPower,
+        signed,
+        aniso: Math.abs(signed)
+      };
+    }
+
+    function analyze(od, os) {
+      const { K, R, maxSignedMeridian, minSignedMeridian } = extremes(od, os);
+      const flat = roundD(K + R) === roundD(K - R);
+      const seDiff = roundD(roundD(od.s + od.c / 2) - roundD(os.s + os.c / 2));
+      const constantPower = roundD(od.c) === 0 && roundD(os.c) === 0;
+
+      if (flat) {
+        const sample = meridianSample(od, os, 180);
+        if (!constantPower) {
+          sample.signed = roundD(K);
+          sample.aniso = Math.abs(sample.signed);
+        }
+        return { flat: true, constantPower, peaks: [sample], seDiff };
+      }
+
+      const a = meridianSample(od, os, maxSignedMeridian);
+      const b = meridianSample(od, os, minSignedMeridian);
+      const tie = a.aniso === b.aniso;
+      const peaks = tie
+        ? [a, b].sort((left, right) => left.meridian - right.meridian)
+        : [a.aniso >= b.aniso ? a : b];
+      return { flat: false, constantPower, tie, peaks, seDiff };
+    }
+
+    function relation(signed, scope) {
+      if (signed === 0) return "Both eyes have the same power " + scope + ".";
+      const amount = Math.abs(signed).toFixed(2);
+      const direction = signed > 0 ? "more plus" : "more minus";
+      return "OD is " + amount + " D " + direction + " than OS " + scope + ".";
+    }
+
+    function renderResult(state) {
+      if (state.kind === "empty") {
+        resultEl.innerHTML = '<p class="empty">Enter sphere, cylinder, and axis for both eyes.</p>';
+        return;
+      }
+      if (state.kind === "axis") {
+        resultEl.innerHTML = '<p class="empty">Enter each axis from 0° to 180°.</p>';
+        return;
+      }
+
+      const { flat, constantPower, peaks, seDiff } = state.report;
+      const lead = peaks[0];
+      const magnitude = formatDiopters(lead.aniso);
+      let where;
+      if (flat) {
+        where = "in every meridian";
+      } else if (peaks.length === 2) {
+        where = "at " + peaks[0].meridian + "° and " + peaks[1].meridian + "°";
+      } else {
+        where = "at " + lead.meridian + "°";
+      }
+
+      const items = peaks.map((peak) => {
+        const scope = flat ? "in every meridian" : "at " + peak.meridian + "°";
+        const heading = flat || peaks.length === 1 ? "" : "<strong>" + peak.meridian + "°</strong>";
+        const powers = flat && !constantPower
+          ? '<div class="steady">Each eye’s power still changes with the meridian. The difference between the eyes does not.</div>'
+          : '<div class="powers"><span>OD ' + formatPower(peak.odPower) + "</span><span>OS " + formatPower(peak.osPower) + "</span></div>";
+        return (
+          "<li>" +
+            (heading ? heading : "") +
+            powers +
+            '<div class="relation">' + relation(peak.signed, scope) + "</div>" +
+          "</li>"
+        );
+      }).join("");
+
+      resultEl.innerHTML =
+        '<p class="magnitude">' + magnitude + "</p>" +
+        '<p class="where">' + where + "</p>" +
+        '<ul class="detail">' + items +
+          '<li><div class="se">Spherical equivalent difference: ' + formatSigned(seDiff) + " (OD − OS)</div></li>" +
+        "</ul>";
+    }
+
+    function renderChart(state) {
+      const title = chart.querySelector("title");
+      while (chart.lastChild && chart.lastChild !== title) chart.removeChild(chart.lastChild);
+      if (state.kind !== "ready") {
+        chartNote.textContent = "Signed difference, OD minus OS, from 0° to 180°.";
+        title.textContent = "Power difference by meridian. Enter both prescriptions to plot the curve.";
+        return;
+      }
+
+      const { od, os, report } = state;
+      const samples = [];
+      for (let meridian = 0; meridian <= 180; meridian += 1) {
+        samples.push({
+          meridian,
+          signed: power(od.s, od.c, od.a, meridian) - power(os.s, os.c, os.a, meridian)
+        });
+      }
+
+      const values = samples.map((sample) => sample.signed);
+      let yMin = Math.min(0, ...values);
+      let yMax = Math.max(0, ...values);
+      if (yMax - yMin < 0.5) {
+        yMin = Math.min(yMin, -0.5);
+        yMax = Math.max(yMax, 0.5);
+      }
+      const pad = (yMax - yMin) * 0.12;
+      yMin -= pad;
+      yMax += pad;
+
+      const plot = { left: 52, right: 16, top: 16, bottom: 36 };
+      const width = 640;
+      const height = 280;
+      const plotW = width - plot.left - plot.right;
+      const plotH = height - plot.top - plot.bottom;
+      const xOf = (meridian) => plot.left + (meridian / 180) * plotW;
+      const yOf = (value) => plot.top + ((yMax - value) / (yMax - yMin)) * plotH;
+
+      const ns = "http://www.w3.org/2000/svg";
+      function el(name, attrs) {
+        const node = document.createElementNS(ns, name);
+        for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+        chart.appendChild(node);
+        return node;
+      }
+
+      const step = niceStep(yMax - yMin);
+      const tickStart = Math.ceil(yMin / step) * step;
+      for (let tick = tickStart; tick <= yMax + step * 0.01; tick += step) {
+        const y = yOf(tick);
+        el("line", {
+          x1: plot.left, x2: width - plot.right, y1: y, y2: y,
+          stroke: Math.abs(tick) < 1e-8 ? "#8a8174" : "#e4dcd0",
+          "stroke-width": Math.abs(tick) < 1e-8 ? "1.25" : "1"
+        });
+        el("text", {
+          x: plot.left - 8, y: y + 4, "text-anchor": "end",
+          fill: "#5f574c", "font-size": "12"
+        }).textContent = formatTick(tick);
+      }
+
+      for (const meridian of [0, 45, 90, 135, 180]) {
+        el("text", {
+          x: xOf(meridian), y: height - 12, "text-anchor": "middle",
+          fill: "#5f574c", "font-size": "12"
+        }).textContent = meridian + "°";
+      }
+
+      const points = samples.map((sample) => xOf(sample.meridian).toFixed(2) + "," + yOf(sample.signed).toFixed(2)).join(" ");
+      el("polyline", {
+        points,
+        fill: "none",
+        stroke: "#1e4d45",
+        "stroke-width": "2",
+        "stroke-linejoin": "round",
+        "stroke-linecap": "round"
+      });
+
+      if (!report.flat) {
+        for (const peak of report.peaks) {
+          const signed = power(od.s, od.c, od.a, peak.meridian) - power(os.s, os.c, os.a, peak.meridian);
+          el("line", {
+            x1: xOf(peak.meridian), x2: xOf(peak.meridian),
+            y1: plot.top, y2: plot.top + plotH,
+            stroke: "#a33b24", "stroke-width": "1", "stroke-dasharray": "3 3"
+          });
+          el("circle", {
+            cx: xOf(peak.meridian), cy: yOf(signed), r: "4.5",
+            fill: "#a33b24"
+          });
+        }
+      }
+
+      if (report.flat) {
+        chartNote.textContent = "Signed difference, OD minus OS. It is " + formatSigned(report.peaks[0].signed) + " in every meridian.";
+        title.textContent = "Signed power difference, OD minus OS, " + formatSigned(report.peaks[0].signed) + " in every meridian.";
+      } else {
+        const where = report.peaks.map((peak) => peak.meridian + "°").join(" and ");
+        chartNote.textContent = "Signed difference, OD minus OS, from 0° to 180°. Marks show the greatest absolute difference, at " + where + ".";
+        title.textContent = "Signed power difference, OD minus OS. Greatest absolute difference at " + where + ".";
+      }
+    }
+
+    function formatTick(value) {
+      const rounded = Math.round(value * 100) / 100;
+      if (Math.abs(rounded) < 0.001) return "0";
+      const text = Math.abs(rounded) >= 10 ? rounded.toFixed(0) : rounded.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+      return text;
+    }
+
+    function niceStep(range) {
+      const rough = range / 4;
+      if (rough <= 0) return 0.5;
+      const pow = 10 ** Math.floor(Math.log10(rough));
+      const fraction = rough / pow;
+      if (fraction >= 5) return 5 * pow;
+      if (fraction >= 2) return 2 * pow;
+      return pow;
+    }
+
+    function update() {
+      const od = parseEye(fields.od);
+      const os = parseEye(fields.os);
+      let state;
+      if (od.missing || os.missing) state = { kind: "empty" };
+      else if (od.invalidAxis || os.invalidAxis) state = { kind: "axis" };
+      else state = { kind: "ready", od, os, report: analyze(od, os) };
+      renderResult(state);
+      renderChart(state);
+    }
+
+    for (const eye of [fields.od, fields.os]) {
+      for (const input of [eye.s, eye.c, eye.a]) input.addEventListener("input", update);
+    }
+    update();
+  </script>
+</body>
+</html>
